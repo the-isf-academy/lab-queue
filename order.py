@@ -14,3 +14,6 @@ class Order():
         self.buyer = buyer
         self.shipping_address = shipping_address
         self.content = content
+
+    def __str__(self):
+        return f"id: {self.order_id}, buyer: {self.buyer}, address: {self.shipping_address}, content: {self.content}"

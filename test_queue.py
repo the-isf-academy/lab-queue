@@ -271,7 +271,6 @@ class TestCountMethod(unittest.TestCase):
     def test_count_queue_with_0_elem(self):
         self.assertEqual(self.q.count(0), 0)
 
-
 class TestGetItemBuiltin(unittest.TestCase):
     def setUp(self):
         self.q = Queue()
