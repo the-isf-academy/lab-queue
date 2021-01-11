@@ -1,5 +1,5 @@
 import unittest
-from queue import Queue
+from queue_solution import Queue
 
 class TestBasic(unittest.TestCase):
     def setUp(self):

@@ -1,4 +1,4 @@
-from queue import Queue as StudentQueue
+from queue_solution import Queue as StudentQueue
 from collections import deque
 
 import unittest
@@ -9,6 +9,8 @@ from test_queue import TestGetItemBuiltin, TestCountMethod, TestIndexMethod, \
 
 import random
 import time
+from datetime import datetime
+import os.path
 from tqdm import tqdm
 from copy import copy
 
@@ -23,10 +25,28 @@ struct_names_dict = {
     list: "Python list "
 }
 
+def log_run(test, elapsed_time, passed_tests):
+    log = f"{datetime.now()},{test},{elapsed_time},{iterations},{elapsed_time / iterations},{data_size * iterations},{elapsed_time / (iterations * data_size)},{passed_tests}" + "\n"
+
+    if os.path.isfile('.log_encoded.bin'):
+        with open('.log_encoded.bin', 'ab') as f:
+            f.write(log.encode('IBM037'))
+    else:
+        with open('.log_encoded.bin', 'wb') as f:
+            header = "test_date,test_name,elapsed_time,num_iterations,time_per_iteration,num_operations,time_per_operation,passed_funcationality_tests" + "\n"
+            f.write(header.encode('IBM037'))
+            f.write(log.encode('IBM037'))
+    #make log.csv from encoded log
+    with open('.log_encoded.bin', 'rb') as fb:
+        with open('log.csv', 'w') as fpt:
+            fpt.write(fb.read().decode('IBM037'))
+
+
 class time_iterations():
-    def __init__(self, struct_name, iterations):
+    def __init__(self, struct_name, test_name, passed_tests):
         self.struct_name = struct_name
-        self.iterations = iterations
+        self.test_name = test_name
+        self.passed_tests = passed_tests
 
     def __enter__(self):
         self.elapsed_time = 0
@@ -40,7 +60,9 @@ class time_iterations():
         self.elapsed_time += self.stop_time - self.start_time
 
     def __exit__(self, exc_type, exc, exc_tb):
-        print(f" ---> {self.struct_name} .............. {self.elapsed_time / self.iterations} sec/it")
+        if self.struct_name == "StudentQueue":
+            log_run(self.test_name, self.elapsed_time, self.passed_tests)
+        print(f" ---> {self.struct_name} .............. {self.elapsed_time / iterations} sec/it")
         return False
 
 def test_functionality(TestCase):
@@ -59,6 +81,8 @@ def test_functionality(TestCase):
         print("|    test_queue.py file before doing speed tests with this file.    |")
         print(" -------------------------------------------------------------------")
         print()
+        return False
+    return True
 
 def generate_orders(data_size, randomize=False, unique=True):
     orders = []
@@ -94,12 +118,13 @@ def basic_tests(structs):
     print("===========")
     print("Basic Tests")
     print("===========")
-    TestCase = tests["Basic"]["functionality_test_class"]
-    test_functionality(TestCase)
+    test_name = "Basic"
+    TestCase = tests[test_name]["functionality_test_class"]
+    passed_tests = test_functionality(TestCase)
     print(f"Testing {data_size} append() followed by {data_size} pop():")
     for struct in structs:
         struct_name = struct_names_dict[struct]
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"0", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 q = struct()
                 timer.start()
@@ -115,7 +140,7 @@ def basic_tests(structs):
     print(f"Testing {data_size} append()/pop() combinations:")
     for struct in structs:
         struct_name = struct_names_dict[struct]
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"1", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 q = struct()
                 timer.start()
@@ -133,12 +158,13 @@ def append_tests(structs):
     print("============")
     print("Append Tests")
     print("============")
-    TestCase = tests["Append"]["functionality_test_class"]
-    test_functionality(TestCase)
+    test_name = "Append"
+    TestCase = tests[test_name]["functionality_test_class"]
+    passed_tests = test_functionality(TestCase)
     print(f"Testing {data_size} append():")
     for struct in structs:
         struct_name = struct_names_dict[struct]
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name, passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 q = struct()
                 timer.start()
@@ -152,15 +178,16 @@ def pop_tests(structs):
     print("=========")
     print("Pop Tests")
     print("=========")
-    TestCase = tests["Pop"]["functionality_test_class"]
-    test_functionality(TestCase)
+    test_name = "Pop"
+    TestCase = tests[test_name]["functionality_test_class"]
+    passed_tests = test_functionality(TestCase)
     print(f"Testing {data_size} popleft():")
     for struct in structs:
         struct_name = struct_names_dict[struct]
         base_q = struct()
         for order in random_orders:
             base_q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name, passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 if struct == StudentQueue: #need to recopy queue every time to preserve pseudo-pointers
 
@@ -183,15 +210,16 @@ def remove_tests(structs):
     print("============")
     print("Remove Tests")
     print("============")
-    TestCase = tests["Remove"]["functionality_test_class"]
-    test_functionality(TestCase)
+    test_name = "Remove"
+    TestCase = tests[test_name]["functionality_test_class"]
+    passed_tests = test_functionality(TestCase)
     print(f"Testing {data_size} remove() from front of queue:")
     for struct in structs:
         struct_name = struct_names_dict[struct]
         base_q = struct()
         for order in orders:
             base_q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_front", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 if struct == StudentQueue: #need to recopy queue every time to preserve pseudo-pointers
 
@@ -212,7 +240,7 @@ def remove_tests(structs):
         base_q = struct()
         for order in orders:
             base_q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_end", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 if struct == StudentQueue: #need to recopy queue every time to preserve pseudo-pointers
                     q = struct()
@@ -238,7 +266,7 @@ def remove_tests(structs):
         base_q = struct()
         for order in orders:
             base_q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_random", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 if struct == StudentQueue: # need to recopy queue every time to preserve pseudo-pointers
                     q = struct()
@@ -257,12 +285,13 @@ def insert_tests(structs):
     print("============")
     print("Insert Tests")
     print("============")
-    TestCase = tests["Insert"]["functionality_test_class"]
-    test_functionality(TestCase)
+    test_name = "Insert"
+    TestCase = tests[test_name]["functionality_test_class"]
+    passed_tests = test_functionality(TestCase)
     print(f"Testing {data_size} insert() into front of queue:")
     for struct in structs:
         struct_name = struct_names_dict[struct]
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_front", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 q = struct()
                 timer.start()
@@ -273,7 +302,7 @@ def insert_tests(structs):
     print(f"Testing {data_size} insert() into back of queue:")
     for struct in structs:
         struct_name = struct_names_dict[struct]
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_back", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 q = struct()
                 timer.start()
@@ -285,7 +314,7 @@ def insert_tests(structs):
     insert_sequence = [random.randint(0, i) for i in range(data_size)]
     for struct in structs:
         struct_name = struct_names_dict[struct]
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_random", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 q = struct()
                 timer.start()
@@ -299,15 +328,16 @@ def len_tests(structs):
     print("=========")
     print("Len Tests")
     print("=========")
-    TestCase = tests["Length"]["functionality_test_class"]
-    test_functionality(TestCase)
+    test_name = "Length"
+    TestCase = tests[test_name]["functionality_test_class"]
+    passed_tests = test_functionality(TestCase)
     print(f"Testing getting len() of queue of size {data_size}:")
     for struct in structs:
         struct_name = struct_names_dict[struct]
         q = struct()
         for order in orders:
             q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name, passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 timer.start()
                 len(q)
@@ -319,8 +349,9 @@ def index_tests(structs):
     print("===========")
     print("Index Tests")
     print("===========")
-    TestCase = tests["Index"]["functionality_test_class"]
-    test_functionality(TestCase)
+    test_name = "Index"
+    TestCase = tests[test_name]["functionality_test_class"]
+    passed_tests = test_functionality(TestCase)
     print(f"Testing getting index() of element in sorted queue with {data_size} unique elements:")
     search_sequence = random.sample(orders, iterations)
     for struct in structs:
@@ -328,7 +359,7 @@ def index_tests(structs):
         q = struct()
         for order in orders:
             q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_sorted", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 timer.start()
                 order = search_sequence[i]
@@ -343,7 +374,7 @@ def index_tests(structs):
         q = struct()
         for order in random_orders:
             q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_unsorted", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 timer.start()
                 order = search_sequence[i]
@@ -358,7 +389,7 @@ def index_tests(structs):
         q = struct()
         for order in random_orders:
             q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_unsorted_nonunique", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 timer.start()
                 order = search_sequence[i]
@@ -371,8 +402,9 @@ def count_tests(structs):
     print("===========")
     print("Count Tests")
     print("===========")
-    TestCase = tests["Count"]["functionality_test_class"]
-    test_functionality(TestCase)
+    test_name = "Count"
+    TestCase = tests[test_name]["functionality_test_class"]
+    passed_tests = test_functionality(TestCase)
     print(f"Testing getting count() of elements in sorted queue with {data_size} unique elements:")
     search_sequence = random.sample(orders, iterations)
     for struct in structs:
@@ -380,7 +412,7 @@ def count_tests(structs):
         q = struct()
         for order in orders:
             q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_sorted", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 timer.start()
                 order = search_sequence[i]
@@ -395,7 +427,7 @@ def count_tests(structs):
         q = struct()
         for order in random_orders:
             q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_unsorted", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 timer.start()
                 order = search_sequence[i]
@@ -410,7 +442,7 @@ def count_tests(structs):
         q = struct()
         for order in random_orders:
             q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_unsorted_nonunique", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 timer.start()
                 order = search_sequence[i]
@@ -423,8 +455,9 @@ def get_elem_at_index_tests(structs):
     print("========")
     print("[] Tests")
     print("========")
-    TestCase = tests["[]"]["functionality_test_class"]
-    test_functionality(TestCase)
+    test_name = "[]"
+    TestCase = tests[test_name]["functionality_test_class"]
+    passed_tests = test_functionality(TestCase)
     print(f"Testing getting element at an index ([]) from a sorted queue with {data_size} unique elements:")
     random_indices = [random.randint(0,data_size) for i in range(iterations)]
     for struct in structs:
@@ -432,7 +465,7 @@ def get_elem_at_index_tests(structs):
         q = struct()
         for order in orders:
             q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_sorted", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 timer.start()
                 index = random_indices[i]
@@ -447,7 +480,7 @@ def get_elem_at_index_tests(structs):
         q = struct()
         for order in random_orders:
             q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_unsorted", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 timer.start()
                 index = random_indices[i]
@@ -462,7 +495,7 @@ def get_elem_at_index_tests(structs):
         q = struct()
         for order in random_orders:
             q.append(order)
-        with time_iterations(struct_name, iterations) as timer:
+        with time_iterations(struct_name, test_name+"_unsorted_nonunique", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
                 timer.start()
                 index = random_indices[i]
