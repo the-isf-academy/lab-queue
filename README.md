@@ -54,7 +54,7 @@ As defined above.
 As defined above.
 
 #### `insert()`
-Given a `data`i and an `index` parameter, inserts the data into the queue at the given index.
+Given a `data` and an `index` parameter, inserts the data into the queue at the given index.
 If the index is greater than the length of the queue, the data should be added to the end of the queue.
 
 #### `__len__()`
