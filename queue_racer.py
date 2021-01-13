@@ -28,6 +28,7 @@ from test_queue import TestGetItemBuiltin, TestCountMethod, TestIndexMethod, \
                         TestLenBuiltin, TestInsertMethod, TestRemoveMethod, \
                         TestPopleftMethod, TestAppendMethod, TestMin
 
+import argparse
 import random
 import time
 from datetime import datetime
@@ -592,36 +593,55 @@ tests = {
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Test the time-based efficiency of queue implementations.')
+    parser.add_argument('--structs', metavar='STRUCT', type=str, nargs='*',
+                        help='the data structures you wish to test',
+                        choices=['StudentQueue', 'deque', 'list'])
+    parser.add_argument('--test', metavar='TEST', type=str, nargs='?',
+                        help='the test you wish to run',
+                        choices=[test for test in tests])
+
+    args = parser.parse_args()
     print()
     print("======================================")
     print("🏁 Welcome to the cs10 queue racer! 🏁")
     print("======================================")
     print()
-    print("The following data structures are warming up for today's race:")
-    print("(0) StudentQueue")
-    print("(1) Python deque")
-    print("(2) Python list")
-    print()
-    choice = input("Input the numbers of the structures to compete: ")
     structs = []
-    if "0" in choice:
-        structs.append(StudentQueue)
-    if "1" in choice:
-        structs.append(deque)
-    if "2" in choice:
-        structs.append(list)
+    if not args.structs:
+        print("The following data structures are warming up for today's race:")
+        print("(0) StudentQueue")
+        print("(1) Python deque")
+        print("(2) Python list")
+        print()
+        choice = input("Input the numbers of the structures to compete: ")
+        if "0" in choice:
+            structs.append(StudentQueue)
+        if "1" in choice:
+            structs.append(deque)
+        if "2" in choice:
+            structs.append(list)
+        print()
+    else:
+        if "StudentQueue" in args.structs:
+            structs.append(StudentQueue)
+        if "deque" in args.structs:
+            structs.append(deque)
+        if "list" in args.structs:
+            structs.append(list)
 
-    print()
-    print("Tracks:")
-    for i, test in enumerate(tests):
-        print("({}) {} Track ({})".format(i, test, tests[test]["description"]))
-    test_choice = None
-    while test_choice not in [str(num) for num in range(len(tests))]:
-        test_choice = input("Select a track: ")
-    test_choice = list(tests)[int(test_choice)]
-    test_func = tests[test_choice]["function"]
-    
-    print()
+    if not args.test:
+        print("Tracks:")
+        for i, test in enumerate(tests):
+            print("({}) {} Track ({})".format(i, test, tests[test]["description"]))
+        test_choice = None
+        while test_choice not in [str(num) for num in range(len(tests))]:
+            test_choice = input("Select a track: ")
+        test_choice = list(tests)[int(test_choice)]
+        test_func = tests[test_choice]["function"]
+        print()
+    else:
+        test_func = tests[args.test]["function"]
     print("On your marks, get set, go! {}".format("  ".join(["🏎" for i in range(len(structs))])))
     test_func(structs)
     print()
