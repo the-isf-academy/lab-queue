@@ -27,18 +27,19 @@ import pandas as pd
 basic_tests_list = ["Min0", "Min1", "Append", "Pop", "Insert_front", "Insert_back", "Insert_random", "Length"]
 
 # get most recent test times
-log_df = pd.read_csv('logs/.log_encoded.bin', encoding='IBM037')
-most_recent_tests = log_df.sort_values('test_date').drop_duplicates('test_name',keep='last')
-grading_tests = most_recent_tests[most_recent_tests['test_name'].isin(basic_tests_list)]
-passed_tests = grading_tests[grading_tests['passed_functionality_tests']]
-if passed_tests["elapsed_time"].count() == len(basic_tests_list):
-    test_time_sum = passed_tests.sum()["elapsed_time"]
+if os.path.isfile('logs/.log_encoded.bin'):
+    log_df = pd.read_csv('logs/.log_encoded.bin', encoding='IBM037')
+    most_recent_tests = log_df.sort_values('test_date').drop_duplicates('test_name',keep='last')
+    grading_tests = most_recent_tests[most_recent_tests['test_name'].isin(basic_tests_list)]
+    passed_tests = grading_tests[grading_tests['passed_functionality_tests']]
+    if passed_tests["elapsed_time"].count() == len(basic_tests_list):
+        test_time_sum = passed_tests.sum()["elapsed_time"]
 
-    # tweet it
-    tweet = f'🏁 #queuerace update 🏁\n\n{os.environ["USERNAME"]} just pushed a queue that runs all the speed tests in {test_time_sum} seconds!\n\nCan you beat that? 🏎🏎🏎'
-    auth = tweepy.OAuthHandler(os.environ["API_KEY"], os.environ["API_SECRET"])
-    auth.set_access_token(os.environ["ACCESS_TOKEN"], os.environ["SECRET_TOKEN_KEY"])
-    api = tweepy.API(auth)
-    api.update_status(tweet)
+        # tweet it
+        tweet = f'🏁 #queuerace update 🏁\n\n{os.environ["USERNAME"]} just pushed a queue that runs all the speed tests in {test_time_sum} seconds!\n\nCan you beat that? 🏎🏎🏎'
+        auth = tweepy.OAuthHandler(os.environ["API_KEY"], os.environ["API_SECRET"])
+        auth.set_access_token(os.environ["ACCESS_TOKEN"], os.environ["SECRET_TOKEN_KEY"])
+        api = tweepy.API(auth)
+        api.update_status(tweet)
 
-    # print(tweet)
+        # print(tweet)
