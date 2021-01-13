@@ -1,7 +1,29 @@
-import unittest
-from queue_solution import Queue
+# test_queue.py
+# be Jacob Wolf
+#
+# Testing harness to rtest the functionality of an implementation of a queue structure.
+# Tests the interfaces as defined by the python deque.
+#
+# =============================================================================
+#  More-Than-You-Need-To-Know Lounge
+# =============================================================================
+# Welcome to the More-Than-You-Need-To-Know Lounge, a chill place for code that
+# you don't need to understand.
 
-class TestBasic(unittest.TestCase):
+# Thanks for stopping by, we hope you find something that catches your eye.
+# But don't worry if this stuff doesn't make sense yet -- as long as we know
+# how to use code, we don't have to understand everything about it.
+
+# Of course, if you really like this place, stay a while. You can ask a
+# teacher about it if you're interested.
+#
+# =============================================================================
+
+import unittest
+from queue import Queue
+
+
+class TestMin(unittest.TestCase):
     def setUp(self):
         self.q = Queue()
 
@@ -309,4 +331,34 @@ class TestGetItemBuiltin(unittest.TestCase):
             self.q[3]
 
 if __name__ == '__main__':
-    unittest.main()
+    import argparse
+    parser = argparse.ArgumentParser(description='Run functionality tests on your queue implementation.')
+    parser.add_argument('tests', metavar='TEST_TYPE', type=str, nargs=1,
+                    help='the tests you want to run',
+                    choices=['min', 'basic', 'extension', 'all'])
+    args = parser.parse_args()
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    if args.tests[0] == 'min':
+        suite.addTest(loader.loadTestsFromTestCase(TestMin))
+    elif args.tests[0] == 'basic':
+        suite.addTest(loader.loadTestsFromTestCase(TestMin))
+        suite.addTest(loader.loadTestsFromTestCase(TestAppendMethod))
+        suite.addTest(loader.loadTestsFromTestCase(TestPopleftMethod))
+        suite.addTest(loader.loadTestsFromTestCase(TestInsertMethod))
+        suite.addTest(loader.loadTestsFromTestCase(TestLenBuiltin))
+    elif args.tests[0] == 'extension':
+        suite.addTest(loader.loadTestsFromTestCase(TestIndexMethod))
+        suite.addTest(loader.loadTestsFromTestCase(TestCountMethod))
+        suite.addTest(loader.loadTestsFromTestCase(TestGetItemBuiltin))
+    elif args.tests[0] == 'all':
+        suite.addTest(loader.loadTestsFromTestCase(TestMin))
+        suite.addTest(loader.loadTestsFromTestCase(TestAppendMethod))
+        suite.addTest(loader.loadTestsFromTestCase(TestPopleftMethod))
+        suite.addTest(loader.loadTestsFromTestCase(TestInsertMethod))
+        suite.addTest(loader.loadTestsFromTestCase(TestLenBuiltin))
+        suite.addTest(loader.loadTestsFromTestCase(TestIndexMethod))
+        suite.addTest(loader.loadTestsFromTestCase(TestCountMethod))
+        suite.addTest(loader.loadTestsFromTestCase(TestGetItemBuiltin))
+    unittest.TextTestRunner().run(suite)
+

@@ -1,11 +1,32 @@
-from queue_solution import Queue as StudentQueue
+# queue_racer.py
+# by Jacob Wolf
+#
+# Testing harness to test and log the time-based efficiency of students' queue
+# implementations
+# 
+# =============================================================================
+#  More-Than-You-Need-To-Know Lounge
+# =============================================================================
+# Welcome to the More-Than-You-Need-To-Know Lounge, a chill place for code that
+# you don't need to understand.
+
+# Thanks for stopping by, we hope you find something that catches your eye.
+# But don't worry if this stuff doesn't make sense yet -- as long as we know
+# how to use code, we don't have to understand everything about it.
+
+# Of course, if you really like this place, stay a while. You can ask a
+# teacher about it if you're interested.
+#
+# =============================================================================
+
+from queue import Queue as StudentQueue
 from collections import deque
 
 import unittest
 from io import StringIO
 from test_queue import TestGetItemBuiltin, TestCountMethod, TestIndexMethod, \
                         TestLenBuiltin, TestInsertMethod, TestRemoveMethod, \
-                        TestPopleftMethod, TestAppendMethod, TestBasic
+                        TestPopleftMethod, TestAppendMethod, TestMin
 
 import random
 import time
@@ -25,20 +46,22 @@ struct_names_dict = {
     list: "Python list "
 }
 
+basic_tests_list = ["Min", "Append", "Pop", "Length", "Insert"]
+
 def log_run(test, elapsed_time, passed_tests):
     log = f"{datetime.now()},{test},{elapsed_time},{iterations},{elapsed_time / iterations},{data_size * iterations},{elapsed_time / (iterations * data_size)},{passed_tests}" + "\n"
 
-    if os.path.isfile('.log_encoded.bin'):
-        with open('.log_encoded.bin', 'ab') as f:
+    if os.path.isfile('logs/.log_encoded.bin'):
+        with open('logs/.log_encoded.bin', 'ab') as f:
             f.write(log.encode('IBM037'))
     else:
-        with open('.log_encoded.bin', 'wb') as f:
-            header = "test_date,test_name,elapsed_time,num_iterations,time_per_iteration,num_operations,time_per_operation,passed_funcationality_tests" + "\n"
+        with open('logs/.log_encoded.bin', 'wb') as f:
+            header = "test_date,test_name,elapsed_time,num_iterations,time_per_iteration,num_operations,time_per_operation,passed_functionality_tests" + "\n"
             f.write(header.encode('IBM037'))
             f.write(log.encode('IBM037'))
     #make log.csv from encoded log
-    with open('.log_encoded.bin', 'rb') as fb:
-        with open('log.csv', 'w') as fpt:
+    with open('logs/.log_encoded.bin', 'rb') as fb:
+        with open('logs/log.csv', 'w') as fpt:
             fpt.write(fb.read().decode('IBM037'))
 
 
@@ -112,13 +135,13 @@ def generate_orders(data_size, randomize=False, unique=True):
         random.shuffle(orders)
     return orders
 
-def basic_tests(structs):
+def min_tests(structs):
     random_orders = generate_orders(data_size, randomize=True)
     print()
     print("===========")
-    print("Basic Tests")
+    print("Min Tests")
     print("===========")
-    test_name = "Basic"
+    test_name = "Min"
     TestCase = tests[test_name]["functionality_test_class"]
     passed_tests = test_functionality(TestCase)
     print(f"Testing {data_size} append() followed by {data_size} pop():")
@@ -331,6 +354,7 @@ def len_tests(structs):
     test_name = "Length"
     TestCase = tests[test_name]["functionality_test_class"]
     passed_tests = test_functionality(TestCase)
+    print(passed_tests)
     print(f"Testing getting len() of queue of size {data_size}:")
     for struct in structs:
         struct_name = struct_names_dict[struct]
@@ -502,6 +526,12 @@ def get_elem_at_index_tests(structs):
                 q[index]
                 timer.stop()
 
+def basic_tests(structs):
+    for test in tests:
+        if test in basic_tests_list:
+            test_func = tests[test]["function"]
+            test_func(structs)
+
 def all_tests(structs):
     for test in tests:
         if not test == "Grand Prix":
@@ -509,10 +539,10 @@ def all_tests(structs):
             test_func(structs)
 
 tests = {
-        "Basic": { 
+        "Min": { 
             "description": "Append/Pop {} times".format(data_size),
-            "function": basic_tests,
-            "functionality_test_class": TestBasic
+            "function": min_tests,
+            "functionality_test_class": TestMin
         },
         "Append": {
             "description": "Append {} times".format(data_size),
@@ -524,11 +554,6 @@ tests = {
             "function": pop_tests,
             "functionality_test_class": TestPopleftMethod
         },
-        "Remove": {
-            "description": "Remove {} times".format(data_size),
-            "function": remove_tests,
-            "functionality_test_class": TestRemoveMethod
-        },
         "Insert": {
             "description": "Insert {} times".format(data_size),
             "function": insert_tests,
@@ -538,6 +563,10 @@ tests = {
             "description": "Get len() of queues of varying sizes",
             "function": len_tests,
             "functionality_test_class": TestLenBuiltin
+        },
+        "Basic": {
+            "description": "All tests used to evaluate time-based efficiency of queue. These are the tests used for grading.",
+            "function": basic_tests
         },
         "Index": {
             "description": "Get index of element {} times".format(data_size),
