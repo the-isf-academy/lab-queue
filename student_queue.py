@@ -1,6 +1,6 @@
-# queue.py
+# student_queue.py
 #
-# Base queue implementation for teh cs10 ADTs unit
+# Base queue implementation for the cs10 ADTs unit
 #
 # Our initial implementation will use a singly linked list. But, if you
 # want to make a faster queue, you will need to implement the data structue
