@@ -1,6 +1,13 @@
 # Queue Project
 In this project, students will implement a queue in Python.
 
+## Installation
+To get started, run:
+
+```
+pip install -r requirements.txt
+```
+
 ## Functionality Tests
 You can test the functionality of your queue implementation using the following
 command:
