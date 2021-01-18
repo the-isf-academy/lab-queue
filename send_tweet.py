@@ -24,7 +24,9 @@ import tweepy
 import os
 import pandas as pd
 
-basic_tests_list = ["Min0", "Min1", "Append", "Pop", "Insert_front", "Insert_back", "Insert_random", "Length"]
+#basic_tests_list = ["Min0", "Min1", "Append", "Pop", "Insert_front", "Insert_back", "Insert_random", "Length"]
+
+basic_tests_list = ["Append","Pop","Insert_random","Length"]
 
 # get most recent test times
 if os.path.isfile('logs/.log_encoded.bin'):
@@ -33,10 +35,13 @@ if os.path.isfile('logs/.log_encoded.bin'):
     grading_tests = most_recent_tests[most_recent_tests['test_name'].isin(basic_tests_list)]
     passed_tests = grading_tests[grading_tests['passed_functionality_tests']]
     if passed_tests["elapsed_time"].count() == len(basic_tests_list):
-        test_time_sum = passed_tests.sum()["elapsed_time"]
-
         # tweet it
-        tweet = f'🏁 #queuerace update 🏁\n\n{os.environ["USERNAME"]} just pushed a queue that runs all the speed tests in {test_time_sum} seconds!\n\nCan you beat that? 🏎🏎🏎'
+        tweet = f'🏁 #queuerace update 🏁\n\n{os.environ["USERNAME"]} just pushed a queue with the following stats:\n'
+        # tweet = f'🏁 #queuerace update 🏁\n\n{"USERNAME"} just pushed a queue with the following stats:\n'
+        for index, test in passed_tests.iterrows():
+            tweet += f'{test["test_name"]}: {test["elapsed_time"]} secs\n'
+        
+        tweet += "\n\nCan you beat that? 🏎🏎🏎"
         auth = tweepy.OAuthHandler(os.environ["API_KEY"], os.environ["API_SECRET"])
         auth.set_access_token(os.environ["ACCESS_TOKEN"], os.environ["ACCESS_TOKEN_SECRET"])
         api = tweepy.API(auth)
