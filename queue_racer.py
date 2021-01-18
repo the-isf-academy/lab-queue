@@ -359,7 +359,6 @@ def len_tests(structs):
     test_name = "Length"
     TestCase = tests[test_name]["functionality_test_class"]
     passed_tests = test_functionality(TestCase)
-    print(passed_tests)
     print(f"Testing getting len() of queue of size {data_size}:")
     for struct in structs:
         struct_name = struct_names_dict[struct]
