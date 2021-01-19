@@ -43,7 +43,7 @@ iterations = 10
 
 struct_names_dict = {
     StudentQueue: "StudentQueue",
-    deque: "StudentQueue",
+    deque: "Python deque",
     list: "Python list "
 }
 
@@ -77,10 +77,10 @@ class time_iterations():
         return self
 
     def start(self):
-        self.start_time = time.process_time()
+        self.start_time = time.perf_counter()
 
     def stop(self):
-        self.stop_time = time.process_time()
+        self.stop_time = time.perf_counter()
         self.elapsed_time += self.stop_time - self.start_time
 
     def __exit__(self, exc_type, exc, exc_tb):
@@ -336,11 +336,15 @@ def insert_tests(structs):
                 timer.stop()
 
     print(f"Testing {data_size} insert() into random index of queue:")
-    insert_sequence = [random.randint(0, i) for i in range(data_size)]
+    insert_sequences = []
+    for i in range(iterations):
+        insert_sequence = [random.randint(0, i) for i in range(data_size)]
+        insert_sequences.append(insert_sequence)
     for struct in structs:
         struct_name = struct_names_dict[struct]
         with time_iterations(struct_name, test_name+"_random", passed_tests) as timer:
             for i in tqdm(range(iterations), desc=struct_name, leave=False):
+                insert_sequence = insert_sequences[i]
                 q = struct()
                 timer.start()
                 for index, order in zip(insert_sequence, orders):
