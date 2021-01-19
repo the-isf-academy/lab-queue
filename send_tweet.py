@@ -39,7 +39,7 @@ if os.path.isfile('logs/.log_encoded.bin'):
         tweet = f'🏁 #queuerace update 🏁\n\n{os.environ["USERNAME"]} just pushed a queue with the following stats:\n'
         # tweet = f'🏁 #queuerace update 🏁\n\n{"USERNAME"} just pushed a queue with the following stats:\n'
         for index, test in passed_tests.iterrows():
-            tweet += f'{test["test_name"]}: {test["elapsed_time"]} secs\n'
+            tweet += f'{test["test_name"]}: {test["time_per_iteration"]} sec/it\n'
         
         tweet += "\n\nCan you beat that? 🏎🏎🏎"
         auth = tweepy.OAuthHandler(os.environ["API_KEY"], os.environ["API_SECRET"])
